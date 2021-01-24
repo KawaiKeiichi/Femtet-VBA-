@@ -1,0 +1,1188 @@
+Private Sub CommandButton1_Click()
+Call Femtet開
+End Sub
+
+Sub 解析()
+Dim FEMTET As New CFemtet
+Dim Als As CAnalysis
+Dim BodyAttr As CBodyAttribute
+Dim Bnd As CBoundary
+Dim Mtl As CMaterial
+Dim Gaudi As CGaudi
+Dim Gogh As CGogh
+'/////////////////////////null***の説明/////////////////////////
+'//下記の四つの変数はCGaudiクラスMulti***を使用する場合に用います。
+'//例えばMultiFilletを使用する場合に引数であるVertex(点)は指定せず
+'//複数のEdge(線)だけをFilletする場合にnullVertex()を用います。
+'//「Gaudi.MultiFillet nullVertex,Edge」とすれば
+'//複数のEdgeだけFilletすることができます。
+'/////////////////////////////////////////////////////////////
+    count = 27
+    Do While Cells(count, 2) <> ""
+         
+        '------- プロジェクトをロード -------
+        Dim FilePath As String
+        FilePath = Cells(count, 2)
+        If FEMTET.LoadProject(FilePath, True) = False Then
+            FEMTET.ShowLastError
+        End If
+        
+        '------- メッシュの生成 -------
+        FEMTET.Gaudi.Mesh
+        
+        '------- 解析の実行 -------
+        FEMTET.Solve
+                
+        '------- 計算結果ファイル保存 -------
+        FEMTET.SavePDT FEMTET.ResultFilePath & ".pdt", True
+        
+'        '------- スクリーンショット -------
+'        FEMTET.OpenPDT FEMTET.ResultFilePath & ".pdt", True 'pdtファイルを開きます
+'        ' グラデーションコンター図を描画
+'        FEMTET.Gogh.bContour_G = True
+'        FEMTET.SavePicture FEMTET.ResultFilePath & "_" & CStr(count) & ".jpg", 3000, 2000, 80
+        
+        count = count + 1
+    
+    Loop
+End Sub
+
+Sub Femtet開()
+If Workbooks("FemtetRef.xla").GetFemtetActivate() = True Then
+    MsgBox "Femtet起動済"
+Else
+    'MsgBox "Femtetが起動していません"
+    Workbooks("FemtetRef.xla").ExecFemtet
+End If
+End Sub
+Sub モデル開()
+
+Dim Gogh As CGogh
+Dim Point As New CGaudiPoint
+Dim Vector As New CGaudiVector
+
+Dim Body As CGaudiBody
+
+Dim count As Byte
+Dim FEMTET As New CFemtet
+If FEMTET.LoadProject(Cells(Cells(3, 2) + 26, 2), True) = False Then
+    FEMTET.ShowLastError
+End If
+End Sub
+
+
+
+Private Sub CommandButton11_Click()
+Call 解析
+End Sub
+
+Private Sub CommandButton12_Click()
+Call node
+End Sub
+
+Private Sub CommandButton2_Click()
+Call モデル開
+End Sub
+Private Sub CommandButton3_Click()
+Call 結果開
+End Sub
+Sub 結果開()
+Dim iLen As Long     '// 文字列長
+Dim s As String
+Dim FEMTET As New CFemtet
+s = Cells(Cells(3, 4) + 26, 2)
+iLen = Len(s)
+'If FEMTET.OpenPDT(Left(s, iLen - 6) & "Results\解析モデル.pdt", True) = False Then      '解析結果開く(拡張子がResultsの場合)
+If FEMTET.OpenPDT(s, True) = False Then                                                  '解析結果開く(拡張子がpdtの場合)
+    FEMTET.ShowLastError
+End If
+End Sub
+Private Sub CommandButton4_Click()
+Call タブ閉
+End Sub
+
+Sub タブ閉()
+Dim FEMTET As New CFemtet
+Dim Gaudi As CGaudi
+Dim Point As New CGaudiPoint
+Dim Body As CGaudiBody
+
+'新規プロジェクト作成
+If FEMTET.OpenNewProject() = False Then
+
+  FEMTET.ShowLastError
+End If
+
+'Femtet.Gaudiを変数Gaudiに代入して使いやすくする
+Set Gaudi = FEMTET.Gaudi
+
+
+
+Point.x = 0
+Point.y = 0
+Point.z = 0
+
+Set Body = Gaudi.CreateVertex(Point)
+
+If (Gaudi.CloseModel(False) = False) Then
+  FEMTET.ShowLastError
+End If
+
+End Sub
+
+Private Sub CommandButton5_Click()
+Call 画像クリア
+End Sub
+
+Sub 画像クリア()
+Dim a As Integer
+a = 1
+    '画像を削除
+    Dim shp As Shape
+
+    For Each shp In ActiveSheet.Shapes
+        If shp.Type = msoPicture Then shp.Delete
+    Next shp
+    Do While Cells(a, 20) <> ""
+        Cells(a, 20) = ""
+        a = a + 1
+    Loop
+End Sub
+
+Private Sub CommandButton6_Click()
+Call 写す
+End Sub
+
+Sub 写す()
+Dim FEMTET As New CFemtet
+     If FEMTET.CopyPicture = False Then
+         FEMTET.ShowLastError
+     End If
+     ActiveSheet.Paste
+     Selection.ShapeRange.LockAspectRatio = msoTrue ' 画像の縦横比を固定
+     Selection.ShapeRange.Width = 160 * 1 ' 画像の幅を調整
+End Sub
+
+Private Sub CommandButton7_Click()
+Call 加工
+End Sub
+
+Sub 加工()
+Dim maisu As Byte
+Dim i As Byte
+Dim j As Byte
+Dim yoko As Byte
+Dim y As Byte
+Dim m As Byte
+Dim o As Byte
+Dim p As Byte
+Dim R As Byte
+Dim q As Byte
+Dim t As Byte
+
+    t = 1
+    o = ActiveSheet.Cells(8, 2)
+    maisu = ActiveSheet.Cells(5, 2)
+    yoko = ActiveSheet.Cells(6, 2)
+    p = ActiveSheet.Cells(7, 2)
+'    Range("E2").Value = yoko
+    y = maisu / yoko
+    For m = 1 To y Step 1
+'    r = 1
+        For i = 1 To yoko Step 1    'パラメータ
+'            Call test(t)
+            Call TrimPicturez(o)
+            Call 図形のサイズ変更z(o)
+            Call 図形の移動2(o, i * 5 - 4, m * 13 + 30)
+'            r = 0
+            o = o + 1
+            t = t + 1
+        Next
+'    q = 1
+        For j = 1 To yoko Step 1    'メイン
+            Call TrimPicture(p)
+            Call 図形のサイズ変更p(p)
+            Call 図形の移動(p, j * 5, m * 13 + 30)
+'            q = 0
+            p = p + 1
+        Next
+    Next
+
+End Sub
+
+Sub 図形の移動(c As Byte, b As Byte, a As Byte)
+    Dim FEMTET As New CFemtet
+    Dim h As String
+    Dim g As String
+    Dim f As String
+'    Dim yoko As Byte
+'    yoko = ActiveSheet.Cells(2, 3)
+'    Range("E2").Value = k
+    h = "図" & "" & Str(c)
+'    Range("F5").Value = h
+    g = mojihenkan(b)
+    f = g & CStr(a)
+    With ActiveSheet.Shapes(h)
+        .Top = Range(f).Top
+        .Left = Range(f).Left
+    End With
+End Sub
+
+
+Sub 図形の移動2(c As Byte, b As Byte, a As Byte)
+    Dim FEMTET As New CFemtet
+    Dim h As String
+    Dim g As String
+    Dim f As String
+'    Dim yoko As Byte
+'    yoko = ActiveSheet.Cells(2, 3)
+'    Range("E2").Value = k
+    h = "図" & "" & Str(c)
+'    Range("F5").Value = h
+    g = mojihenkan(b)
+    f = g & CStr(a)
+'    Range("H10").Value = f
+    With ActiveSheet.Shapes(h)
+        .Top = Range(f).Top
+        .Left = Range(f).Left
+    End With
+End Sub
+
+
+Sub TrimPicture(a As Byte)
+    Dim k As String
+    k = "図" & "" & Str(a)
+'    Range("E7").Value = k
+     ActiveSheet.Shapes(k).PictureFormat.CropTop = Cells(29, 23)
+     ActiveSheet.Shapes(k).PictureFormat.CropRight = Cells(29, 24)
+     ActiveSheet.Shapes(k).PictureFormat.CropLeft = Cells(29, 25)
+     ActiveSheet.Shapes(k).PictureFormat.CropBottom = Cells(29, 26)
+End Sub
+
+Sub TrimPicturez(a As Byte)
+    Dim k As String
+    k = "図" & "" & Str(a)
+'    Range("E6").Value = k
+     ActiveSheet.Shapes(k).PictureFormat.CropTop = Cells(28, 23)
+     ActiveSheet.Shapes(k).PictureFormat.CropRight = Cells(28, 24)
+     ActiveSheet.Shapes(k).PictureFormat.CropLeft = Cells(28, 25)
+     ActiveSheet.Shapes(k).PictureFormat.CropBottom = Cells(28, 26)
+End Sub
+
+Function mojihenkan(i As Byte)
+    Dim a As String
+    If i = 1 Then
+        s = "e"
+    ElseIf i = 2 Then
+        s = "f"
+    ElseIf i = 3 Then
+        s = "g"
+    ElseIf i = 4 Then
+        s = "h"
+    ElseIf i = 5 Then
+        s = "i"
+    ElseIf i = 6 Then
+        s = "j"
+    ElseIf i = 7 Then
+        s = "k"
+    ElseIf i = 8 Then
+        s = "l"
+    ElseIf i = 9 Then
+        s = "m"
+    ElseIf i = 10 Then
+        s = "n"
+    ElseIf i = 11 Then
+        s = "o"
+    ElseIf i = 12 Then
+        s = "p"
+    ElseIf i = 13 Then
+        s = "q"
+    ElseIf i = 14 Then
+        s = "r"
+    ElseIf i = 15 Then
+        s = "s"
+    ElseIf i = 16 Then
+        s = "t"
+    ElseIf i = 17 Then
+        s = "u"
+    ElseIf i = 18 Then
+        s = "v"
+    ElseIf i = 19 Then
+        s = "w"
+    ElseIf i = 20 Then
+        s = "x"
+    ElseIf i = 21 Then
+        s = "y"
+    ElseIf i = 22 Then
+        s = "z"
+    ElseIf i = 23 Then
+        s = "aa"
+    ElseIf i = 24 Then
+        s = "ab"
+    ElseIf i = 25 Then
+        s = "ac"
+    ElseIf i = 26 Then
+        s = "ad"
+    ElseIf i = 27 Then
+        s = "ae"
+    ElseIf i = 28 Then
+        s = "af"
+    ElseIf i = 29 Then
+        s = "ag"
+    ElseIf i = 30 Then
+        s = "ah"
+    ElseIf i = 31 Then
+        s = "ai"
+    ElseIf i = 32 Then
+        s = "aj"
+    End If
+    mojihenkan = s
+End Function
+
+Sub 図形のサイズ変更z(a As Byte)
+    Dim k As String
+    k = "図" & "" & Str(a)
+'    Range("E6").Value = k
+   ActiveSheet.Shapes(k).Width = ActiveSheet.Shapes(2).Width * 6
+   ActiveSheet.Shapes(k).Height = ActiveSheet.Shapes(3).Height * 6
+End Sub
+
+Sub 図形のサイズ変更p(a As Byte)
+    Dim k As String
+    k = "図" & "" & Str(a)
+'    Range("E6").Value = k
+   ActiveSheet.Shapes(k).Width = ActiveSheet.Shapes(2).Width * 6.2
+   ActiveSheet.Shapes(k).Height = ActiveSheet.Shapes(3).Height * 6.2
+End Sub
+
+Sub fukuse(a As Byte)
+    Dim k As String
+    k = "図" & "" & Str(a)
+'    Range("E6").Value = k
+    ActiveSheet.Shapes(k).Copy
+    ActiveSheet.Paste Destination:=Range("E5")
+End Sub
+
+Sub 複製()
+Dim t As Byte
+        t = 1
+        maisu = ActiveSheet.Cells(5, 2)
+        For i = 1 To maisu Step 1
+            Call fukuse(t)
+            t = t + 1
+        Next
+End Sub
+
+Private Sub CommandButton8_Click()
+Call 複製
+End Sub
+
+Private Sub CommandButton9_Click()
+Dim a As Byte
+a = 26 + Cells(3, 4)
+'Call 圧電解析断面電界コンター10(a)
+If Cells(4, 9) = "圧電解析変位" Then
+Call 圧電解析変位(a)
+End If
+If Cells(4, 9) = "圧電解析断面電圧コンター10" Then
+Call 圧電解析断面電圧コンター10(a)
+End If
+If Cells(4, 9) = "圧電解析断面電界コンター10" Then
+Call 圧電解析断面電界コンター10(a)
+End If
+If Cells(4, 9) = "電界解析断面電位" Then
+Call 電界解析断面電位(a)
+End If
+If Cells(4, 9) = "電界解析断面電界コンター10" Then
+Call 電界解析断面電界コンター10(a)
+End If
+If Cells(4, 9) = "電界解析断面電界ベクトル" Then
+Call 電界解析断面電界ベクトル(a)
+End If
+If Cells(4, 9) = "共振解析変位手動" Then
+Call 共振解析変位手動(a, Cells(5, 10))
+End If
+End Sub
+
+
+Sub 条件反映(a As Byte)
+Dim FEMTET As New CFemtet
+Dim Gogh As CGogh
+Dim Point As New CGaudiPoint
+Dim Vector As New CGaudiVector
+Dim Body As CGaudiBody
+Dim iLen As Long     '// 文字列長
+Dim s As String
+Dim k As Byte         '//条件設定
+
+k = Cells(3, 13)        '//条件設定
+s = Cells(a, 11)
+iLen = Len(s)
+'-----------------------------------------
+'If FEMTET.LoadProject(s, True) = False Then     'モデル開いて写す
+'    FEMTET.ShowLastError
+'End If
+'Call 写す
+'-----------------------------------------
+'If FEMTET.OpenPDT(Left(s, iLen - 6) & "Results\解析モデル.pdt", True) = False Then      '解析結果開く(拡張子がResultsの場合)
+If FEMTET.OpenPDT(s, True) = False Then                                                  '解析結果開く(拡張子がpdtの場合)
+    FEMTET.ShowLastError
+End If
+'Femtet.Goghを変数Goghに代入して使いやすくする
+Set Gogh = FEMTET.Gogh
+'色分割をOFFに設定
+FEMTET.Gogh.Setting.Contour_bDivideColor = False
+If FEMTET.ChangeViewPosition(VIEW_FRONT) = False Then
+    FEMTET.ShowLastError
+End If
+FEMTET.Gogh.Coulomb.Vector = COULOMB_ELECTRIC_C     '電界解析の電界のベクトル表示
+'Gogh.Rayleigh.Vector = RAYLEIGH_DISPLACEMENT_C      '圧電解析の変位のベクトル表示
+'Gogh.Rayleigh.Potential = RAYLEIGH_VOLTAGE_C         '圧電解析の電圧表示
+'要素ベクトル図をONに設定
+FEMTET.Gogh.bVector = True
+'グラデーションコンター図をONに設定
+'FEMTET.Gogh.bContour_G = True
+'ベクトルを何分の一に間引くかを設定
+If Cells(8, k + 5) <> 1 Then
+FEMTET.Gogh.Setting.Vector_nCurtail = Cells(8, k + 5)
+End If
+'ベクトルの形状の倍率を設定
+FEMTET.Gogh.Setting.Vector_Ratio = Cells(9, k + 5)
+'画面を10倍に拡大
+FEMTET.Zoom Cells(10, k + 5)
+'切断面上の点
+Point.SetCoord Cells(11, k + 5), Cells(12, k + 5), Cells(13, k + 5)
+'切断面の法線ベクトル
+Vector.SetCoord Cells(14, k + 5), Cells(15, k + 5), Cells(16, k + 5)
+' 断面を追加
+If Cells(17, k + 5) = 1 Then
+FEMTET.Gogh.AddSlice Point, Vector
+End If
+If Cells(20, k + 5) = 1 Then
+'ベクトルの最小値を設定
+FEMTET.Gogh.Setting.Vector_MinValue = Cells(18, k + 5)
+'ベクトルの最大値を設定
+FEMTET.Gogh.Setting.Vector_MaxValue = Cells(19, k + 5)
+End If
+End Sub
+
+Sub node()
+Dim FEMTET As New CFemtet
+Dim Als As CAnalysis
+Dim BodyAttr As CBodyAttribute
+Dim Bnd As CBoundary
+Dim Mtl As CMaterial
+Dim Gaudi As CGaudi
+Dim Gogh As CGogh
+Dim x, y, z As Double
+Dim nNode As Long
+Dim iNode As Long
+Dim result() As CComplex
+Dim a As Long
+Dim s As String
+Dim k As Double         '//条件設定
+Dim e As Byte
+Dim q As Byte
+
+q = 0
+    e = 27
+ Do While Cells(e, 2) <> ""
+k = Cells(3, 17)        '//条件設定
+p = Cells(e, 2)
+'s = Cells(p, 2)
+iLen = Len(p)
+'If FEMTET.OpenPDT(Left(p, iLen - 6) & "Results\解析モデル.pdt", True) = False Then      '解析結果開く(拡張子がResultsの場合)
+If FEMTET.OpenPDT(p, True) = False Then                                                  '解析結果開く(拡張子がpdtの場合)
+    FEMTET.ShowLastError
+End If
+    a = 0
+
+    '------- 変数にオブジェクトの設定 -------
+    Set Gogh = FEMTET.Gogh
+
+    'FEMTET.OpenPDT Cells(27, 2).Value 'pdtファイルを開きます
+    'モードの設定
+    Gogh.Coulomb.Mode = 0
+    
+    'Gogh.Galileo.Potential = GALILEO_VON_MISES_C 'ミーゼス応力を設定
+    Gogh.Coulomb.Vector = COULOMB_ELECTRIC_C
+    'Gogh.Coulomb.Part = PART_VEC_Z_PART_C
+    'フィールドを電界に設定
+    'Gogh.Coulomb.Vector = COULOMB_ELECTRIC_C
+  
+    'Gogh.Coulomb.Part = PART_VEC_LENGTH_C
+    nNode = Gogh.Data.nMeshNode  '節点数
+    '節点ループ
+    For iNode = 0 To nNode - 1
+      If Gogh.Data.MeshNodeArray(iNode).y <= Cells(3, 17) + 0.01 Then
+      If Gogh.Data.MeshNodeArray(iNode).y >= Cells(3, 17) - 0.01 Then
+        'Cells(a + 4, 31) = iNode
+        
+        '節点座標を取得
+        x = Gogh.Data.MeshNodeArray(iNode).x
+        y = Gogh.Data.MeshNodeArray(iNode).y
+        z = Gogh.Data.MeshNodeArray(iNode).z
+        Cells(1, 39 + q * 5) = q
+        Cells(1, 40 + q * 5) = "x"
+        Cells(1, 41 + q * 5) = "y"
+        Cells(1, 42 + q * 5) = "z"
+        
+        Cells(a + 2, 40 + q * 5) = x
+        Cells(a + 2, 41 + q * 5) = y
+        Cells(a + 2, 42 + q * 5) = z
+        
+        'Gogh.Galileo.GetPotentialAtPoint x, y, z, result '節点結果を取得
+        Gogh.Coulomb.GetVectorAtPoint x, y, z, result() '節点結果を取得
+        Cells(1, 43 + q * 5) = "node"
+        Cells(a + 2, 43 + q * 5) = ((result(0).Real) ^ 2 + (result(1).Real) ^ 2 + (result(2).Real) ^ 2) ^ 0.5
+        'Cells(a + 4, 36) = ((result(0).Imag) ^ 2 + (result(1).Imag) ^ 2 + (result(2).Imag) ^ 2) ^ 0.5
+        'Cells(a + 4, 5) = result.Real
+        a = a + 1
+      End If
+      End If
+    Next iNode
+  e = e + 1
+  q = q + 1
+ Loop
+End Sub
+
+Private Sub CommandButton10_Click()
+Dim a As Byte
+Dim ky As Byte
+ky = 1
+a = 27
+'Call 解析
+Do While Cells(a, 2) <> ""
+'    Call 圧電解析断面電圧コンター10(a)
+'    Call 写す
+'    Call 圧電解析断面電界コンター10(a)
+'    Call 写す
+'    Call 圧電解析変位(a)
+'    Call 写す
+'    Call node(a)
+'    Call モデル開
+'    Call 写す
+    Call 電界解析断面電位(a)
+    Call 写す
+    Call 電界解析断面電界(a)
+    Call 写す
+    Call 電界解析断面電界コンター10(a)
+    Call 写す
+'    Call 共振解析変位自動(a, ky) 'Call写すは組込済
+    a = a + 1
+    Call タブ閉
+Loop
+'Call 複製
+'Call 加工
+End Sub
+
+
+Sub 電界解析断面電界(a As Byte)
+Dim FEMTET As New CFemtet
+Dim Gogh As CGogh
+Dim Point As New CGaudiPoint
+Dim Vector As New CGaudiVector
+Dim Body As CGaudiBody
+Dim iLen As Long     '// 文字列長
+Dim s As String
+Dim k As Byte         '//条件設定
+
+k = Cells(3, 13)        '//条件設定
+s = Cells(a, 2)
+iLen = Len(s)
+'-----------------------------------------
+'If FEMTET.LoadProject(s, True) = False Then     'モデル開いて写す
+'    FEMTET.ShowLastError
+'End If
+'Call 写す
+'-----------------------------------------
+'If FEMTET.OpenPDT(Left(s, iLen - 6) & "Results\解析モデル.pdt", True) = False Then      '解析結果開く(拡張子がResultsの場合)
+If FEMTET.OpenPDT(s, True) = False Then                                                  '解析結果開く(拡張子がpdtの場合)
+    FEMTET.ShowLastError
+End If
+'Femtet.Goghを変数Goghに代入して使いやすくする
+Set Gogh = FEMTET.Gogh
+'色分割をOFFに設定
+FEMTET.Gogh.Setting.Contour_bDivideColor = False
+If FEMTET.ChangeViewPosition(VIEW_FRONT) = False Then
+    FEMTET.ShowLastError
+End If
+FEMTET.Gogh.Coulomb.Vector = COULOMB_ELECTRIC_C     '電界解析の電界のベクトル表示
+'Gogh.Rayleigh.Vector = RAYLEIGH_DISPLACEMENT_C      '圧電解析の変位のベクトル表示
+'Gogh.Rayleigh.Potential = RAYLEIGH_VOLTAGE_C         '圧電解析の電圧表示
+'要素ベクトル図をONに設定
+FEMTET.Gogh.bVector = True
+'グラデーションコンター図をONに設定
+'FEMTET.Gogh.bContour_G = True
+'ベクトルを何分の一に間引くかを設定
+If Cells(8, k + 5) <> 1 Then
+FEMTET.Gogh.Setting.Vector_nCurtail = Cells(8, k + 5)
+End If
+'ベクトルの形状の倍率を設定
+FEMTET.Gogh.Setting.Vector_Ratio = Cells(9, k + 5)
+'画面を10倍に拡大
+FEMTET.Zoom Cells(10, k + 5)
+'切断面上の点
+Point.SetCoord Cells(11, k + 5), Cells(12, k + 5), Cells(13, k + 5)
+'切断面の法線ベクトル
+Vector.SetCoord Cells(14, k + 5), Cells(15, k + 5), Cells(16, k + 5)
+' 断面を追加
+If Cells(17, k + 5) = 1 Then
+FEMTET.Gogh.AddSlice Point, Vector
+End If
+If Cells(20, k + 5) = 1 Then
+'ベクトルの最小値を設定
+FEMTET.Gogh.Setting.Vector_MinValue = Cells(18, k + 5)
+'ベクトルの最大値を設定
+FEMTET.Gogh.Setting.Vector_MaxValue = Cells(19, k + 5)
+End If
+End Sub
+Sub 電界解析断面電界ベクトル(a As Byte)
+Dim FEMTET As New CFemtet
+Dim Gogh As CGogh
+Dim Point As New CGaudiPoint
+Dim Vector As New CGaudiVector
+Dim Body As CGaudiBody
+Dim iLen As Long     '// 文字列長
+Dim s As String
+Dim k As Byte         '//条件設定
+
+k = Cells(3, 13)        '//条件設定
+s = Cells(a, 2)
+iLen = Len(s)
+'-----------------------------------------
+'If FEMTET.LoadProject(s, True) = False Then     'モデル開いて写す
+'    FEMTET.ShowLastError
+'End If
+'Call 写す
+'-----------------------------------------
+'If FEMTET.OpenPDT(Left(s, iLen - 6) & "Results\解析モデル.pdt", True) = False Then      '解析結果開く(拡張子がResultsの場合)
+If FEMTET.OpenPDT(s, True) = False Then                                                  '解析結果開く(拡張子がpdtの場合)
+    FEMTET.ShowLastError
+End If
+'Femtet.Goghを変数Goghに代入して使いやすくする
+Set Gogh = FEMTET.Gogh
+'色分割をOFFに設定
+FEMTET.Gogh.Setting.Contour_bDivideColor = False
+If FEMTET.ChangeViewPosition(VIEW_FRONT) = False Then
+    FEMTET.ShowLastError
+End If
+FEMTET.Gogh.Coulomb.Vector = COULOMB_ELECTRIC_C     '電界解析の電界のベクトル表示
+'Gogh.Rayleigh.Vector = RAYLEIGH_DISPLACEMENT_C      '圧電解析の変位のベクトル表示
+'Gogh.Rayleigh.Potential = RAYLEIGH_VOLTAGE_C         '圧電解析の電圧表示
+'要素ベクトル図をONに設定
+FEMTET.Gogh.bVector = True
+'グラデーションコンター図をONに設定
+'FEMTET.Gogh.bContour_G = True
+'ベクトルを何分の一に間引くかを設定
+If Cells(8, k + 5) <> 1 Then
+FEMTET.Gogh.Setting.Vector_nCurtail = Cells(8, k + 5)
+End If
+'ベクトルの形状の倍率を設定
+FEMTET.Gogh.Setting.Vector_Ratio = Cells(9, k + 5)
+'画面を10倍に拡大
+FEMTET.Zoom Cells(10, k + 5)
+'切断面上の点
+Point.SetCoord Cells(11, k + 5), Cells(12, k + 5), Cells(13, k + 5)
+'切断面の法線ベクトル
+Vector.SetCoord Cells(14, k + 5), Cells(15, k + 5), Cells(16, k + 5)
+' 断面を追加
+If Cells(17, k + 5) = 1 Then
+FEMTET.Gogh.AddSlice Point, Vector
+End If
+If Cells(20, k + 5) = 1 Then
+'ベクトルの最小値を設定
+FEMTET.Gogh.Setting.Vector_MinValue = Cells(18, k + 5)
+'ベクトルの最大値を設定
+FEMTET.Gogh.Setting.Vector_MaxValue = Cells(19, k + 5)
+End If
+End Sub
+Sub 電界解析断面電位(a As Byte)
+Dim FEMTET As New CFemtet
+Dim Gogh As CGogh
+Dim Point As New CGaudiPoint
+Dim Vector As New CGaudiVector
+Dim Body As CGaudiBody
+Dim iLen As Long     '// 文字列長
+Dim s As String
+Dim k As Byte         '//条件設定
+
+k = Cells(3, 13)        '//条件設定
+s = Cells(a, 2)
+iLen = Len(s)
+'-----------------------------------------
+'If FEMTET.LoadProject(s, True) = False Then     'モデル開いて写す
+'    FEMTET.ShowLastError
+'End If
+'Call 写す
+'-----------------------------------------
+'If FEMTET.OpenPDT(Left(s, iLen - 6) & "Results\解析モデル.pdt", True) = False Then      '解析結果開く(拡張子がResultsの場合)
+If FEMTET.OpenPDT(s, True) = False Then                                                  '解析結果開く(拡張子がpdtの場合)
+    FEMTET.ShowLastError
+End If
+'Femtet.Goghを変数Goghに代入して使いやすくする
+Set Gogh = FEMTET.Gogh
+'色分割をOFFに設定
+FEMTET.Gogh.Setting.Contour_bDivideColor = False
+If FEMTET.ChangeViewPosition(VIEW_FRONT) = False Then
+    FEMTET.ShowLastError
+End If
+Gogh.Coulomb.Potential = COULOMB_VOLTAGE_C          '電界解析の電位ポテンシャル表示
+'FEMTET.Gogh.Coulomb.Vector = COULOMB_ELECTRIC_C     '電界解析の電界のベクトル表示
+'Gogh.Rayleigh.Vector = RAYLEIGH_DISPLACEMENT_C      '圧電解析の変位のベクトル表示
+'Gogh.Rayleigh.Potential = RAYLEIGH_VOLTAGE_C         '圧電解析の電圧表示
+'要素ベクトル図をONに設定
+'FEMTET.Gogh.bVector = True
+'グラデーションコンター図をONに設定
+FEMTET.Gogh.bContour_G = True
+'ベクトルを何分の一に間引くかを設定
+If Cells(8, k + 5) <> 1 Then
+FEMTET.Gogh.Setting.Vector_nCurtail = Cells(8, k + 5)
+End If
+'ベクトルの形状の倍率を設定
+FEMTET.Gogh.Setting.Vector_Ratio = Cells(9, k + 5)
+'画面を10倍に拡大
+FEMTET.Zoom Cells(10, k + 5)
+'切断面上の点
+Point.SetCoord Cells(11, k + 5), Cells(12, k + 5), Cells(13, k + 5)
+'切断面の法線ベクトル
+Vector.SetCoord Cells(14, k + 5), Cells(15, k + 5), Cells(16, k + 5)
+' 断面を追加
+If Cells(17, k + 5) = 1 Then
+FEMTET.Gogh.AddSlice Point, Vector
+End If
+If Cells(20, k + 5) = 1 Then
+'ベクトルの最小値を設定
+FEMTET.Gogh.Setting.Vector_MinValue = Cells(18, k + 5)
+'ベクトルの最大値を設定
+FEMTET.Gogh.Setting.Vector_MaxValue = Cells(19, k + 5)
+End If
+End Sub
+
+Sub 電界解析断面電界コンター10(a As Byte)
+Dim FEMTET As New CFemtet
+Dim Gogh As CGogh
+Dim Point As New CGaudiPoint
+Dim Vector As New CGaudiVector
+Dim Body As CGaudiBody
+Dim iLen As Long     '// 文字列長
+Dim s As String
+Dim k As Byte         '//条件設定
+
+k = Cells(3, 11)        '//条件設定
+s = Cells(a, 2)
+iLen = Len(s)
+'-----------------------------------------
+'If FEMTET.LoadProject(s, True) = False Then     'モデル開いて写す
+'    FEMTET.ShowLastError
+'End If
+'Call 写す
+'-----------------------------------------
+'If FEMTET.OpenPDT(Left(s, iLen - 6) & "Results\解析モデル.pdt", True) = False Then      '解析結果開く(拡張子がResultsの場合)
+If FEMTET.OpenPDT(s, True) = False Then                                                  '解析結果開く(拡張子がpdtの場合)
+    FEMTET.ShowLastError
+End If
+'Femtet.Goghを変数Goghに代入して使いやすくする
+Set Gogh = FEMTET.Gogh
+''色分割をOFFに設定
+'FEMTET.Gogh.Setting.Contour_bDivideColor = False
+If FEMTET.ChangeViewPosition(VIEW_FRONT) = False Then
+    FEMTET.ShowLastError
+End If
+FEMTET.Gogh.Coulomb.Vector = COULOMB_ELECTRIC_C     '電界解析の電界のベクトル表示
+'Gogh.Rayleigh.Vector = RAYLEIGH_DISPLACEMENT_C      '圧電解析の変位のベクトル表示
+'Gogh.Rayleigh.Potential = RAYLEIGH_VOLTAGE_C         '圧電解析の電圧表示
+'要素ベクトル図をONに設定
+'FEMTET.Gogh.bVector = True
+'グラデーションコンター図をONに設定
+FEMTET.Gogh.bContour_G = True
+'コンターの分割数を設定
+FEMTET.Gogh.Setting.Contour_nDivide = 10
+''ベクトルを何分の一に間引くかを設定
+'If Cells(8, k + 5) <> 1 Then
+'FEMTET.Gogh.Setting.Vector_nCurtail = Cells(8, k + 5)
+'End If
+''ベクトルの形状の倍率を設定
+'FEMTET.Gogh.Setting.Vector_Ratio = Cells(9, k + 5)
+'画面を10倍に拡大
+FEMTET.Zoom Cells(10, k + 5)
+'切断面上の点
+Point.SetCoord Cells(11, k + 5), Cells(12, k + 5), Cells(13, k + 5)
+'切断面の法線ベクトル
+Vector.SetCoord Cells(14, k + 5), Cells(15, k + 5), Cells(16, k + 5)
+' 断面を追加
+If Cells(17, k + 5) = 1 Then
+FEMTET.Gogh.AddSlice Point, Vector
+End If
+If Cells(20, k + 5) = 1 Then
+'ベクトルの最小値を設定
+FEMTET.Gogh.Setting.Vector_MinValue = Cells(18, k + 5)
+'ベクトルの最大値を設定
+FEMTET.Gogh.Setting.Vector_MaxValue = Cells(19, k + 5)
+End If
+End Sub
+
+Sub 圧電解析断面電圧コンター10(a As Byte)
+Dim FEMTET As New CFemtet
+Dim Als As CAnalysis
+Dim Gogh As CGogh
+Dim Point As New CGaudiPoint
+Dim Vector As New CGaudiVector
+Dim Body As CGaudiBody
+Dim iLen As Long     '// 文字列長
+Dim s As String
+Dim k As Byte         '//条件設定
+
+k = Cells(3, 13)        '//条件設定
+s = Cells(a, 2)
+iLen = Len(s)
+'-----------------------------------------
+'If FEMTET.LoadProject(s, True) = False Then     'モデル開いて写す
+'    FEMTET.ShowLastError
+'End If
+'Call 写す
+'-----------------------------------------
+'If FEMTET.OpenPDT(Left(s, iLen - 6) & "Results\解析モデル.pdt", True) = False Then      '解析結果開く(拡張子がResultsの場合)
+If FEMTET.OpenPDT(s, True) = False Then                                                  '解析結果開く(拡張子がpdtの場合)
+    FEMTET.ShowLastError
+End If
+'Femtet.Goghを変数Goghに代入して使いやすくする
+Set Gogh = FEMTET.Gogh
+''色分割をOFFに設定
+'FEMTET.Gogh.Setting.Contour_bDivideColor = False
+If FEMTET.ChangeViewPosition(VIEW_FRONT) = False Then
+    FEMTET.ShowLastError
+End If
+'FEMTET.Gogh.Coulomb.Vector = COULOMB_ELECTRIC_C     '電界解析の電界のベクトル表示
+'Gogh.Rayleigh.Vector = RAYLEIGH_DISPLACEMENT_C      '圧電解析の変位のベクトル表示
+Gogh.Rayleigh.Potential = RAYLEIGH_VOLTAGE_C         '圧電解析の電圧表示
+'Gogh.Rayleigh.Potential = RAYLEIGH_ELECTRIC_C         '圧電解析の電界表示
+'要素ベクトル図をONに設定
+'FEMTET.Gogh.bVector = True
+'グラデーションコンター図をONに設定
+FEMTET.Gogh.bContour_G = True
+'コンターの分割数を設定
+FEMTET.Gogh.Setting.Contour_nDivide = 10
+''ベクトルを何分の一に間引くかを設定
+'If Cells(8, k + 5) <> 1 Then
+'FEMTET.Gogh.Setting.Vector_nCurtail = Cells(8, k + 5)
+'End If
+''ベクトルの形状の倍率を設定
+'FEMTET.Gogh.Setting.Vector_Ratio = Cells(9, k + 5)
+'画面を10倍に拡大
+FEMTET.Zoom Cells(10, k + 5)
+'切断面上の点
+Point.SetCoord Cells(11, k + 5), Cells(12, k + 5), Cells(13, k + 5)
+'切断面の法線ベクトル
+Vector.SetCoord Cells(14, k + 5), Cells(15, k + 5), Cells(16, k + 5)
+' 断面を追加
+If Cells(17, k + 5) = 1 Then
+FEMTET.Gogh.AddSlice Point, Vector
+End If
+If Cells(20, k + 5) = 1 Then
+'ベクトルの最小値を設定
+FEMTET.Gogh.Setting.Vector_MinValue = Cells(18, k + 5)
+'ベクトルの最大値を設定
+FEMTET.Gogh.Setting.Vector_MaxValue = Cells(19, k + 5)
+End If
+End Sub
+
+Sub 圧電解析断面電界コンター10(a As Byte)
+Dim FEMTET As New CFemtet
+Dim Als As CAnalysis
+Dim Gogh As CGogh
+Dim Point As New CGaudiPoint
+Dim Vector As New CGaudiVector
+Dim Body As CGaudiBody
+Dim iLen As Long     '// 文字列長
+Dim s As String
+Dim k As Byte         '//条件設定
+
+k = Cells(3, 13)        '//条件設定
+s = Cells(a, 2)
+iLen = Len(s)
+'-----------------------------------------
+'If FEMTET.LoadProject(s, True) = False Then     'モデル開いて写す
+'    FEMTET.ShowLastError
+'End If
+'Call 写す
+'-----------------------------------------
+'If FEMTET.OpenPDT(Left(s, iLen - 6) & "Results\解析モデル.pdt", True) = False Then      '解析結果開く(拡張子がResultsの場合)
+If FEMTET.OpenPDT(s, True) = False Then                                                  '解析結果開く(拡張子がpdtの場合)
+    FEMTET.ShowLastError
+End If
+'Femtet.Goghを変数Goghに代入して使いやすくする
+Set Gogh = FEMTET.Gogh
+''色分割をOFFに設定
+'FEMTET.Gogh.Setting.Contour_bDivideColor = False
+If FEMTET.ChangeViewPosition(VIEW_FRONT) = False Then
+    FEMTET.ShowLastError
+End If
+'FEMTET.Gogh.Coulomb.Vector = COULOMB_ELECTRIC_C     '電界解析の電界のベクトル表示
+'Gogh.Rayleigh.Vector = RAYLEIGH_DISPLACEMENT_C      '圧電解析の変位のベクトル表示
+'Gogh.Rayleigh.Potential = RAYLEIGH_VOLTAGE_C         '圧電解析の電圧表示
+Gogh.Rayleigh.Vector = RAYLEIGH_ELECTRIC_FIELD_C      '圧電解析の電界表示
+'要素ベクトル図をONに設定
+'FEMTET.Gogh.bVector = True
+'グラデーションコンター図をONに設定
+FEMTET.Gogh.bContour_G = True
+'コンターの分割数を設定
+FEMTET.Gogh.Setting.Contour_nDivide = 10
+''ベクトルを何分の一に間引くかを設定
+'If Cells(8, k + 5) <> 1 Then
+'FEMTET.Gogh.Setting.Vector_nCurtail = Cells(8, k + 5)
+'End If
+''ベクトルの形状の倍率を設定
+'FEMTET.Gogh.Setting.Vector_Ratio = Cells(9, k + 5)
+'画面を10倍に拡大
+FEMTET.Zoom Cells(10, k + 5)
+'切断面上の点
+Point.SetCoord Cells(11, k + 5), Cells(12, k + 5), Cells(13, k + 5)
+'切断面の法線ベクトル
+Vector.SetCoord Cells(14, k + 5), Cells(15, k + 5), Cells(16, k + 5)
+' 断面を追加
+If Cells(17, k + 5) = 1 Then
+FEMTET.Gogh.AddSlice Point, Vector
+End If
+If Cells(20, k + 5) = 1 Then
+'ベクトルの最小値を設定
+FEMTET.Gogh.Setting.Vector_MinValue = Cells(18, k + 5)
+'ベクトルの最大値を設定
+FEMTET.Gogh.Setting.Vector_MaxValue = Cells(19, k + 5)
+End If
+End Sub
+
+Sub 圧電解析変位(a As Byte)
+Dim FEMTET As New CFemtet
+Dim Gogh As CGogh
+Dim Point As New CGaudiPoint
+Dim Vector As New CGaudiVector
+Dim Body As CGaudiBody
+Dim iLen As Long     '// 文字列長
+Dim s As String
+Dim k As Byte         '//条件設定
+
+k = Cells(3, 13)        '//条件設定
+s = Cells(a, 2)
+iLen = Len(s)
+'-----------------------------------------
+'If FEMTET.LoadProject(s, True) = False Then     'モデル開いて写す
+'    FEMTET.ShowLastError
+'End If
+'Call 写す
+'-----------------------------------------
+'If FEMTET.OpenPDT(Left(s, iLen - 6) & "Results\解析モデル.pdt", True) = False Then      '解析結果開く(拡張子がResultsの場合)
+If FEMTET.OpenPDT(s, True) = False Then                                                  '解析結果開く(拡張子がpdtの場合)
+    FEMTET.ShowLastError
+End If
+'Femtet.Goghを変数Goghに代入して使いやすくする
+Set Gogh = FEMTET.Gogh
+'色分割をOFFに設定
+'FEMTET.Gogh.Setting.Contour_bDivideColor = False
+If FEMTET.ChangeViewPosition(VIEW_FRONT) = False Then
+    FEMTET.ShowLastError
+End If
+'変位図をONに設定
+FEMTET.Gogh.bDisplacement = True
+'視点を全ボディにフィット
+FEMTET.Fit
+'FEMTET.Gogh.Coulomb.Vector = COULOMB_ELECTRIC_C     '電界解析の電界のベクトル表示
+Gogh.Rayleigh.Vector = RAYLEIGH_DISPLACEMENT_C      '圧電解析の変位のベクトル表示
+'Gogh.Rayleigh.Potential = RAYLEIGH_VOLTAGE_C         '圧電解析の電圧表示
+'要素ベクトル図をONに設定
+'FEMTET.Gogh.bVector = True
+'グラデーションコンター図をONに設定
+FEMTET.Gogh.bContour_G = True
+'コンターの分割数を設定
+FEMTET.Gogh.Setting.Contour_nDivide = 10
+''ベクトルを何分の一に間引くかを設定
+'If Cells(8, k + 5) <> 1 Then
+'FEMTET.Gogh.Setting.Vector_nCurtail = Cells(8, k + 5)
+'End If
+''ベクトルの形状の倍率を設定
+'FEMTET.Gogh.Setting.Vector_Ratio = Cells(9, k + 5)
+'画面を10倍に拡大
+FEMTET.Zoom Cells(10, k + 5)
+''切断面上の点
+'Point.SetCoord Cells(11, k + 5), Cells(12, k + 5), Cells(13, k + 5)
+''切断面の法線ベクトル
+'Vector.SetCoord Cells(14, k + 5), Cells(15, k + 5), Cells(16, k + 5)
+'' 断面を追加
+'If Cells(17, k + 5) = 1 Then
+'FEMTET.Gogh.AddSlice Point, Vector
+'End If
+'If Cells(20, k + 5) = 1 Then
+''ベクトルの最小値を設定
+'FEMTET.Gogh.Setting.Vector_MinValue = Cells(18, k + 5)
+''ベクトルの最大値を設定
+'FEMTET.Gogh.Setting.Vector_MaxValue = Cells(19, k + 5)
+'End If
+End Sub
+
+Sub 共振解析変位自動(a As Byte, ky As Byte)
+Dim FEMTET As New CFemtet
+Dim Gogh As CGogh
+Dim Point As New CGaudiPoint
+Dim Vector As New CGaudiVector
+Dim Body As CGaudiBody
+Dim nMode As Integer
+Dim iLen As Long     '// 文字列長
+Dim s As String
+Dim k As Byte         '//条件設定
+
+k = Cells(3, 13)        '//条件設定
+s = Cells(a, 2)
+iLen = Len(s)
+'-----------------------------------------
+'If FEMTET.LoadProject(s, True) = False Then     'モデル開いて写す
+'    FEMTET.ShowLastError
+'End If
+'Call 写す
+'-----------------------------------------
+'If FEMTET.OpenPDT(Left(s, iLen - 6) & "Results\解析モデル.pdt", True) = False Then      '解析結果開く(拡張子がResultsの場合)
+If FEMTET.OpenPDT(s, True) = False Then                                                  '解析結果開く(拡張子がpdtの場合)
+    FEMTET.ShowLastError
+End If
+'Femtet.Goghを変数Goghに代入して使いやすくする
+Set Gogh = FEMTET.Gogh
+'色分割をOFFに設定
+'FEMTET.Gogh.Setting.Contour_bDivideColor = False
+If FEMTET.ChangeViewPosition(VIEW_FRONT) = False Then
+    FEMTET.ShowLastError
+End If
+'変位図をONに設定
+FEMTET.Gogh.bDisplacement = True
+'視点を全ボディにフィット
+FEMTET.Fit
+'FEMTET.Gogh.Coulomb.Vector = COULOMB_ELECTRIC_C     '電界解析の電界のベクトル表示
+'Gogh.Rayleigh.Vector = RAYLEIGH_DISPLACEMENT_C      '圧電解析の変位のベクトル表示
+'Gogh.Rayleigh.Potential = RAYLEIGH_VOLTAGE_C         '圧電解析の電圧表示
+Gogh.Galileo.Vector = GALILEO_DISPLACEMENT_C        '共振解析の変位
+Gogh.Galileo.Part = PART_VEC_LENGTH_C               '共振解析の共振-反共振の周波数差
+'要素ベクトル図をONに設定
+'FEMTET.Gogh.bVector = True
+'グラデーションコンター図をONに設定
+Gogh.bContour_G = True
+'コンターの分割数を設定
+Gogh.Setting.Contour_nDivide = 10
+nMode = FEMTET.Gogh.Galileo.nMode
+    ' モード数ループ
+    For i = 0 To nMode - 1
+        '視点を全ボディにフィット
+        FEMTET.Fit
+        Gogh.Galileo.Mode = i
+        ModeLabel = "Mode[" & i & "]:" & Gogh.Galileo.ModeLabel(i)
+        ActiveSheet.Cells(ky, 20) = ModeLabel
+        '画面を拡大
+        FEMTET.Zoom 0.7
+        Call 写す
+        ky = ky + 1
+    Next i
+    ActiveSheet.Cells(ky, 20) = "-------------" & a - 26 & "-------------"
+    ky = ky + 1
+''ベクトルを何分の一に間引くかを設定
+'If Cells(8, k + 5) <> 1 Then
+'FEMTET.Gogh.Setting.Vector_nCurtail = Cells(8, k + 5)
+'End If
+''ベクトルの形状の倍率を設定
+'FEMTET.Gogh.Setting.Vector_Ratio = Cells(9, k + 5)
+
+''切断面上の点
+'Point.SetCoord Cells(11, k + 5), Cells(12, k + 5), Cells(13, k + 5)
+''切断面の法線ベクトル
+'Vector.SetCoord Cells(14, k + 5), Cells(15, k + 5), Cells(16, k + 5)
+'' 断面を追加
+'If Cells(17, k + 5) = 1 Then
+'FEMTET.Gogh.AddSlice Point, Vector
+'End If
+'If Cells(20, k + 5) = 1 Then
+''ベクトルの最小値を設定
+'FEMTET.Gogh.Setting.Vector_MinValue = Cells(18, k + 5)
+''ベクトルの最大値を設定
+'FEMTET.Gogh.Setting.Vector_MaxValue = Cells(19, k + 5)
+'End If
+
+End Sub
+
+Sub 共振解析変位手動(a As Byte, ky As Byte)
+Dim FEMTET As New CFemtet
+Dim Gogh As CGogh
+Dim Point As New CGaudiPoint
+Dim Vector As New CGaudiVector
+Dim Body As CGaudiBody
+Dim nMode As Integer
+Dim iLen As Long     '// 文字列長
+Dim s As String
+Dim k As Byte         '//条件設定
+
+k = Cells(3, 13)        '//条件設定
+s = Cells(a, 2)
+iLen = Len(s)
+'-----------------------------------------
+'If FEMTET.LoadProject(s, True) = False Then     'モデル開いて写す
+'    FEMTET.ShowLastError
+'End If
+'Call 写す
+'-----------------------------------------
+'If FEMTET.OpenPDT(Left(s, iLen - 6) & "Results\解析モデル.pdt", True) = False Then      '解析結果開く(拡張子がResultsの場合)
+If FEMTET.OpenPDT(s, True) = False Then                                                  '解析結果開く(拡張子がpdtの場合)
+    FEMTET.ShowLastError
+End If
+'Femtet.Goghを変数Goghに代入して使いやすくする
+Set Gogh = FEMTET.Gogh
+'色分割をOFFに設定
+'FEMTET.Gogh.Setting.Contour_bDivideColor = False
+If FEMTET.ChangeViewPosition(VIEW_FRONT) = False Then
+    FEMTET.ShowLastError
+End If
+'変位図をONに設定
+FEMTET.Gogh.bDisplacement = True
+'視点を全ボディにフィット
+FEMTET.Fit
+'FEMTET.Gogh.Coulomb.Vector = COULOMB_ELECTRIC_C     '電界解析の電界のベクトル表示
+'Gogh.Rayleigh.Vector = RAYLEIGH_DISPLACEMENT_C      '圧電解析の変位のベクトル表示
+'Gogh.Rayleigh.Potential = RAYLEIGH_VOLTAGE_C         '圧電解析の電圧表示
+Gogh.Galileo.Vector = GALILEO_DISPLACEMENT_C        '共振解析の変位
+Gogh.Galileo.Part = PART_VEC_LENGTH_C               '共振解析の共振-反共振の周波数差
+'要素ベクトル図をONに設定
+'FEMTET.Gogh.bVector = True
+'グラデーションコンター図をONに設定
+FEMTET.Gogh.bContour_G = True
+'コンターの分割数を設定
+FEMTET.Gogh.Setting.Contour_nDivide = 10
+'nMode = FEMTET.Gogh.Galileo.nMode
+    ' モード数ループ
+'    For i = 0 To nMode - 1
+        Gogh.Galileo.Mode = ky
+        ModeLabel = "Mode[" & ky & "]:" & Gogh.Galileo.ModeLabel(ky)
+        ActiveSheet.Cells(1, 20) = ModeLabel
+        '視点を全ボディにフィット
+        FEMTET.Fit
+        '画面を拡大
+        FEMTET.Zoom 0.7
+'        Call 写す
+'        ky = ky + 1
+'    Next i
+''ベクトルを何分の一に間引くかを設定
+'If Cells(8, k + 5) <> 1 Then
+'FEMTET.Gogh.Setting.Vector_nCurtail = Cells(8, k + 5)
+'End If
+''ベクトルの形状の倍率を設定
+'FEMTET.Gogh.Setting.Vector_Ratio = Cells(9, k + 5)
+
+''切断面上の点
+'Point.SetCoord Cells(11, k + 5), Cells(12, k + 5), Cells(13, k + 5)
+''切断面の法線ベクトル
+'Vector.SetCoord Cells(14, k + 5), Cells(15, k + 5), Cells(16, k + 5)
+'' 断面を追加
+'If Cells(17, k + 5) = 1 Then
+'FEMTET.Gogh.AddSlice Point, Vector
+'End If
+'If Cells(20, k + 5) = 1 Then
+''ベクトルの最小値を設定
+'FEMTET.Gogh.Setting.Vector_MinValue = Cells(18, k + 5)
+''ベクトルの最大値を設定
+'FEMTET.Gogh.Setting.Vector_MaxValue = Cells(19, k + 5)
+'End If
+
+End Sub
